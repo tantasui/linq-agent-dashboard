@@ -119,3 +119,53 @@ export const initials = (name: string) =>
     .map((w) => w[0])
     .join("")
     .toUpperCase();
+
+// ---------------------------------------------------------------- board
+
+export type ColumnKey = "talked" | "signed" | "verified" | "link" | "paid" | "regular";
+
+/** Board columns. Colour runs red → green along the brand gradient: green is money. */
+export const COLUMNS: { key: ColumnKey; label: string; hint: string; color: string }[] = [
+  { key: "talked", label: "Talked", hint: "Visited, not signed up", color: "#e2685d" },
+  { key: "signed", label: "Signed up", hint: "Account made, setting up", color: "#f2883f" },
+  { key: "verified", label: "Verified", hint: "KYB passed, no pay link", color: "#ffac2e" },
+  { key: "link", label: "Pay link", hint: "Ready, waiting for a payment", color: "#d9c45e" },
+  { key: "paid", label: "First payment", hint: "1–2 payments so far", color: "#bcd58a" },
+  { key: "regular", label: "Regular", hint: "3+ payments", color: "#a0e0ab" },
+];
+
+export const REGULAR_AT = 3;
+
+export function columnOf(m: Merchant): ColumnKey | null {
+  switch (m.stage) {
+    case "lost":
+      return null;
+    case "conversation":
+    case "interested":
+      return "talked";
+    case "signed_up":
+    case "bank_added":
+      return "signed";
+    case "verified":
+      return "verified";
+    case "link_created":
+      return "link";
+    case "transacting":
+      return m.payments.length >= REGULAR_AT ? "regular" : "paid";
+  }
+}
+
+export const daysInStage = (m: Merchant, now: number) =>
+  Math.floor((now - (m.history[m.history.length - 1]?.at ?? m.createdAt)) / DAY);
+
+/** The one thing blocking this business, if anything. */
+export function blocker(m: Merchant, now: number): { text: string; tone: "red" | "orange" } | null {
+  if (m.kyb.status === "review") return { text: "KYB review", tone: "orange" };
+  if (m.kyb.status === "failed") return { text: "KYB failed", tone: "red" };
+  if (m.stage === "signed_up") return { text: "No bank yet", tone: "orange" };
+  if (m.stage === "bank_added") return { text: "Not verified", tone: "orange" };
+  if (isDormant(m, now)) return { text: "Quiet 14d+", tone: "red" };
+  const d = daysInStage(m, now);
+  if (m.stage !== "transacting" && d >= 7) return { text: `Stuck ${d}d`, tone: "red" };
+  return null;
+}

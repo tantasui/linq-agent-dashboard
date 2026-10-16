@@ -87,7 +87,7 @@ export function seed(now = Date.now()): Data {
   BUSINESSES.forEach((businessName, i) => {
     const agent = i < 4 ? agents[4] : pick(working);
     const stage = pick(reach);
-    const start = now - between(3, 75) * DAY - between(0, 10) * 3_600_000;
+    const start = now - (stage === "transacting" ? between(30, 75) : between(2, 20)) * DAY - between(0, 10) * 3_600_000;
     const history: Merchant["history"] = [];
     let t = start;
     const path = stage === "lost" ? (["conversation", "lost"] as Stage[]) : STAGES.slice(0, STAGES.indexOf(stage as never) + 1);
@@ -135,7 +135,7 @@ export function seed(now = Date.now()): Data {
     if (stage === "transacting") {
       const first = history[history.length - 1].at;
       const n = between(1, 9);
-      const dormant = r() < 0.25;
+      const dormant = r() < 0.12;
       const payments: Payment[] = [];
       for (let k = 0; k < n; k++) {
         const end = dormant ? Math.min(first + 10 * DAY, now - 16 * DAY) : now;

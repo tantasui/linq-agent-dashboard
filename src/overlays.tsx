@@ -123,12 +123,12 @@ function InteractionModal({ merchantId, onClose }: { merchantId?: string; onClos
     if (followUp) {
       dispatch({ type: "addFollowUp", followUp: { id: uid("fu"), merchantId: id, agentId, trigger: "call_back", priority: "medium", due: new Date(followUp).getTime(), status: "open" } });
     }
-    toast("Interaction logged");
+    toast("Visit logged");
     onClose();
   }
 
   return (
-    <Modal title="New interaction" sub="Log a field conversation while it's fresh." onClose={onClose}>
+    <Modal title="Log a visit" sub="Write it down before the next shop." onClose={onClose}>
       {picker}
       {!existing && <Chips value={isNew ? "new" : "old"} options={[["new", "New business"], ["old", "Existing business"]]} onChange={(v) => setIsNew(v === "new")} />}
       {isNew ? (
@@ -194,7 +194,7 @@ function InteractionModal({ merchantId, onClose }: { merchantId?: string; onClos
       </Field>
       <div className="row between">
         <button className="btn ghost" onClick={onClose}>Cancel</button>
-        <button className="btn primary" disabled={!canSave} onClick={save}>Save interaction</button>
+        <button className="btn primary" disabled={!canSave} onClick={save}>Save visit</button>
       </div>
     </Modal>
   );
@@ -214,12 +214,12 @@ function NoteModal({ merchantId, onClose }: { merchantId?: string; onClose: () =
 
   function save() {
     dispatch({ type: "addNote", note: { id: uid("nt"), agentId, at: Date.now(), category, area, observation: observation.trim(), quote: quote.trim() || undefined, hypothesis: hypothesis.trim() || undefined, merchantId } });
-    toast("Field note saved");
+    toast("Note saved");
     onClose();
   }
 
   return (
-    <Modal title="Field note" sub="Write what you saw. Keep their exact words separate from what you think it means." onClose={onClose}>
+    <Modal title="Market note" sub="What you saw, their exact words, and what you think it means — kept apart." onClose={onClose}>
       {picker}
       <Field label="Type">
         <Chips value={category} options={Object.entries(NOTE_LABEL) as [NoteCategory, string][]} onChange={setCategory} />
@@ -582,10 +582,10 @@ function PaymentModal({ id, onClose }: { id: string; onClose: () => void }) {
 
 // ---------------------------------------------------------------- merchant
 
-function nextStep(m: Merchant): { label: string; run: "stage" | "verify" | "payment"; to?: Stage } | null {
+export function nextStep(m: Merchant): { label: string; run: "stage" | "verify" | "payment"; to?: Stage } | null {
   switch (m.stage) {
     case "conversation":
-      return { label: "Mark as interested", run: "stage", to: "interested" };
+      return { label: "They're interested", run: "stage", to: "interested" };
     case "interested":
       return { label: "Merchant signed up", run: "stage", to: "signed_up" };
     case "signed_up":
@@ -638,7 +638,7 @@ function MerchantDrawer({ id, onClose }: { id: string; onClose: () => void }) {
       </div>
 
       <div className="row">
-        <button className="btn primary small" onClick={() => open({ kind: "interaction", merchantId: id })}><MessageSquarePlus size={14} /> Log interaction</button>
+        <button className="btn primary small" onClick={() => open({ kind: "interaction", merchantId: id })}><MessageSquarePlus size={14} /> Log visit</button>
         {step && (
           <button
             className="btn small"
@@ -708,7 +708,7 @@ function MerchantDrawer({ id, onClose }: { id: string; onClose: () => void }) {
         <div className="card-head">
           <h2>Timeline</h2>
           <span className="spacer" />
-          <button className="btn small ghost" onClick={() => open({ kind: "note", merchantId: id })}>Add field note</button>
+          <button className="btn small ghost" onClick={() => open({ kind: "note", merchantId: id })}>Add note</button>
         </div>
         <div className="timeline">
           {events.map((e, i) => (

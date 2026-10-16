@@ -22,7 +22,7 @@ works with no rewrites:
 - **Netlify:** build `npm run build`, publish `dist`
 - Or drag the `dist/` folder into Netlify Drop
 
-Links can point straight at a page, e.g. `/#/agent/workspace`.
+Links can point straight at a page, e.g. `/#/agent/pipeline`.
 
 ## What's in it
 

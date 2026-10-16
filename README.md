@@ -22,26 +22,27 @@ works with no rewrites:
 - **Netlify:** build `npm run build`, publish `dist`
 - Or drag the `dist/` folder into Netlify Drop
 
-Links can point straight at a page, e.g. `/#/agent/pipeline`.
+Links can point straight at a page, e.g. `/#/agent/workspace`.
 
 ## What's in it
 
-Home is a **pipeline board**: every business is a card moving left to right
-through Linq's stages — Talked → Signed up → Verified → Pay link → First
-payment → Regular. Column colour runs red → green (green is money). Each card
-shows what's blocking it and has a → button for its next step. A "biggest
-leak" callout filters the board to stuck businesses.
+The layout deliberately follows the field-sales tool our partner already uses
+(sidebar, Master/Agent switch, same kinds of pages) so there's nothing new to
+learn, with Linq's own additions on top.
 
-| Page | Who | What |
-|---|---|---|
-| Pipeline | everyone | The board, last-7-days numbers, agent filter |
-| Today | everyone | Who to chase: overdue, today, coming up |
-| Team | master | Agent cards with stage spread, add/pause agents |
-| Notes | everyone | Market notes feed: merchant's words vs agent's take |
-| Checks | master | Tiered KYB queue (approve, reject, retry CAC) |
-| Insights | everyone | Stage flow, objections, competitors, retention, markets |
+| Mode | Pages |
+|---|---|
+| Master | Overview, Agents, Businesses, KYC checks, Funnel, Follow-ups, Field intel, Territory |
+| Agent | Field workspace, My businesses, Follow-ups, Field intel, My stats, My history |
 
-"Viewing as" in the top bar switches between the master and any agent.
+Linq additions: a "biggest leak" callout (where businesses are stuck, and
+which ones), a List/Board toggle on Businesses, a blocker flag on every
+business ("No bank yet", "KYB review", "Quiet 14d+"), follow-ups grouped into
+overdue/today/coming up with a call button, a stage bar per agent, the tiered
+KYB explainer, and a "biggest drop" sentence on the funnel.
+
+Styling follows the Front-style DESIGN.md: aubergine canvas, lilac hairlines
+instead of shadows, lilac-mist number cards, lime only on the primary action.
 
 Demo-only controls (live, these come from Linq B2B automatically):
 stage buttons on a business, "Simulate a payment", and the simulated Smile ID
@@ -56,7 +57,7 @@ ending `0` isn't found and ending `9` simulates the registry being down.
 - `src/derive.ts` — funnel maths and the follow-up rules
 - `src/store.tsx` — state, persisted to localStorage
 - `src/overlays.tsx` — modals and drawers (interaction, note, KYB, agent, business)
-- `src/pages.tsx` — pages; `src/App.tsx` — top bar, phone tab bar, routing
+- `src/pages.tsx` — pages; `src/App.tsx` — sidebar shell and routing
 
 When a backend arrives, `store.tsx` is the seam: swap the reducer's actions for
 API calls and keep the pages as they are.

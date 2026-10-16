@@ -67,6 +67,7 @@ const QUOTES = [
 ];
 
 export function seed(now = Date.now()): Data {
+  const today = new Date(now).setHours(0, 0, 0, 0);
   const r = rng(42);
   const pick = <T,>(a: readonly T[]) => a[Math.floor(r() * a.length)];
   const between = (a: number, b: number) => a + Math.floor(r() * (b - a + 1));
@@ -172,7 +173,7 @@ export function seed(now = Date.now()): Data {
 
   // Today's activity, so the field workspace isn't empty on first open.
   working.flatMap((a) => merchants.filter((m) => m.agentId === a.id).slice(0, 3)).forEach((m, k) => {
-    interactions.push({ id: `ix_today_${k}`, merchantId: m.id, agentId: m.agentId, at: now - between(1, 6) * 3_600_000, channel: "visit", outcome: k % 3 === 0 ? "helped_setup" : "interested", quote: k === 1 ? QUOTES[5] : undefined });
+    interactions.push({ id: `ix_today_${k}`, merchantId: m.id, agentId: m.agentId, at: Math.max(today + 60_000 * (k + 1), now - between(1, 6) * 3_600_000), channel: "visit", outcome: k % 3 === 0 ? "helped_setup" : "interested", quote: k === 1 ? QUOTES[5] : undefined });
   });
 
   const notes: FieldNote[] = [

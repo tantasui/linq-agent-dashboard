@@ -1,30 +1,48 @@
-import { CalendarCheck, Columns3, LineChart, MessagesSquare, Plus, Settings as SettingsIcon, ShieldCheck, Users } from "lucide-react";
+import {
+  BarChart3,
+  CheckSquare,
+  ClipboardList,
+  History,
+  LayoutGrid,
+  Lightbulb,
+  MapPin,
+  Menu,
+  Settings as SettingsIcon,
+  ShieldCheck,
+  Store,
+  Users,
+  Wallet,
+} from "lucide-react";
 import { useEffect, useState, type ReactNode } from "react";
-import { startOfDay } from "./derive";
+import { initials, startOfDay } from "./derive";
 import { OverlayProvider, useOverlay } from "./overlays";
-import { Checks, Insights, Notes, Pipeline, Settings, Team, Today, type Page } from "./pages";
+import { Agents, FieldIntel, FollowUps, Funnel, Merchants, MyHistory, Overview, Settings, Territory, Verification, Workspace, type Page } from "./pages";
 import { DAY } from "./seed";
 import { StoreProvider, useScope, useStore, type Mode } from "./store";
 import { LinqMark } from "./ui";
 
-type NavItem = { page: Page; label: string; icon: ReactNode; badge?: number };
+type NavItem = { page: Page; label: string; icon: ReactNode; badge?: number; disabled?: boolean };
 
-const PAGES: Page[] = ["pipeline", "today", "team", "notes", "checks", "insights", "settings"];
-const MASTER_ONLY: Page[] = ["team", "checks"];
-
-const TITLE: Record<Page, string> = {
-  pipeline: "Pipeline",
-  today: "Today",
-  team: "Team",
-  notes: "Notes",
-  checks: "Checks",
-  insights: "Insights",
-  settings: "Demo settings",
+const TITLES: Record<Page, string> = {
+  overview: "Overview",
+  agents: "Agents",
+  merchants: "Businesses",
+  verification: "KYC checks",
+  funnel: "Funnel",
+  followups: "Follow-ups",
+  intel: "Field intel",
+  territory: "Territory",
+  settings: "Settings",
+  workspace: "Field workspace",
+  history: "My history",
 };
 
-function readHash(): { mode: Mode; page: Page; as?: string } | null {
-  const [mode, page] = location.hash.replace(/^#\/?/, "").split("?")[0].split("/");
-  if ((mode === "master" || mode === "agent") && PAGES.includes(page as Page)) return { mode, page: page as Page };
+const HOME: Record<Mode, Page> = { master: "overview", agent: "workspace" };
+const AGENT_PAGES: Page[] = ["workspace", "merchants", "followups", "intel", "funnel", "history", "settings"];
+
+function readHash(): { mode: Mode; page: Page } | null {
+  const [mode, page] = location.hash.replace(/^#\/?/, "").split("/");
+  if ((mode === "master" || mode === "agent") && page && page in TITLES) return { mode, page: page as Page };
   return null;
 }
 
@@ -32,7 +50,8 @@ function Shell() {
   const { data, mode, setMode, actingAgentId, setActingAgentId, toastMsg } = useStore();
   const scope = useScope();
   const overlay = useOverlay();
-  const [page, setPage] = useState<Page>(() => readHash()?.page ?? "pipeline");
+  const [page, setPage] = useState<Page>(() => readHash()?.page ?? "overview");
+  const [menu, setMenu] = useState(false);
 
   // Hash routing, so a refresh or a shared link lands on the same page.
   useEffect(() => {
@@ -50,8 +69,8 @@ function Shell() {
   }, [setMode]);
 
   useEffect(() => {
-    if (mode === "agent" && MASTER_ONLY.includes(page)) {
-      setPage("pipeline");
+    if (mode === "agent" && !AGENT_PAGES.includes(page)) {
+      setPage("workspace");
       return;
     }
     const next = `#/${mode}/${page}`;
@@ -61,98 +80,143 @@ function Shell() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, page]);
 
+  const go = (p: Page) => {
+    setPage(p);
+    setMenu(false);
+  };
+  const switchMode = (m: Mode) => {
+    setMode(m);
+    setPage(HOME[m]);
+    setMenu(false);
+  };
+
   const tomorrow = startOfDay(Date.now()) + DAY;
-  const due = scope.followUps.filter((f) => f.status === "open" && f.due < tomorrow).length;
-  const waiting = data.merchants.filter((m) => ["review", "queued", "failed"].includes(m.kyb.status)).length;
+  const openFu = scope.followUps.filter((f) => f.status === "open" && (mode === "master" || f.due < tomorrow)).length;
+  const review = data.merchants.filter((m) => m.kyb.status === "review" || m.kyb.status === "queued").length;
 
-  const nav: NavItem[] = [
-    { page: "pipeline", label: "Pipeline", icon: <Columns3 size={18} /> },
-    { page: "today", label: "Today", icon: <CalendarCheck size={18} />, badge: due },
-    ...(mode === "master" ? [{ page: "team" as Page, label: "Team", icon: <Users size={18} /> }] : []),
-    { page: "notes", label: "Notes", icon: <MessagesSquare size={18} /> },
-    ...(mode === "master" ? [{ page: "checks" as Page, label: "Checks", icon: <ShieldCheck size={18} />, badge: waiting }] : []),
-    { page: "insights", label: "Insights", icon: <LineChart size={18} /> },
-  ];
+  const groups: { label: string; items: NavItem[] }[] =
+    mode === "master"
+      ? [
+          {
+            label: "Group",
+            items: [
+              { page: "overview", label: "Overview", icon: <LayoutGrid size={17} /> },
+              { page: "agents", label: "Agents", icon: <Users size={17} /> },
+              { page: "merchants", label: "Businesses", icon: <Store size={17} /> },
+              { page: "verification", label: "KYC checks", icon: <ShieldCheck size={17} />, badge: review },
+            ],
+          },
+          {
+            label: "Command centre",
+            items: [
+              { page: "funnel", label: "Funnel", icon: <BarChart3 size={17} /> },
+              { page: "followups", label: "Follow-ups", icon: <CheckSquare size={17} />, badge: openFu },
+              { page: "intel", label: "Field intel", icon: <Lightbulb size={17} /> },
+              { page: "territory", label: "Territory", icon: <MapPin size={17} /> },
+              { page: "settings", label: "Earnings · soon", icon: <Wallet size={17} />, disabled: true },
+            ],
+          },
+        ]
+      : [
+          {
+            label: "In the field",
+            items: [
+              { page: "workspace", label: "Field workspace", icon: <ClipboardList size={17} /> },
+              { page: "merchants", label: "My businesses", icon: <Store size={17} /> },
+              { page: "followups", label: "Follow-ups", icon: <CheckSquare size={17} />, badge: openFu },
+              { page: "intel", label: "Field intel", icon: <Lightbulb size={17} /> },
+            ],
+          },
+          {
+            label: "Me",
+            items: [
+              { page: "funnel", label: "My stats", icon: <BarChart3 size={17} /> },
+              { page: "history", label: "My history", icon: <History size={17} /> },
+            ],
+          },
+        ];
 
-  const viewer = mode === "master" ? "master" : actingAgentId;
+  const agents = data.agents.filter((a) => a.status === "active");
   const me = data.agents.find((a) => a.id === actingAgentId);
+  const title = mode === "agent" && page === "merchants" ? "My businesses" : mode === "agent" && page === "funnel" ? "My stats" : TITLES[page];
 
   return (
-    <div className="app">
-      <header className="topbar">
-        <div className="brand">
-          <LinqMark size={28} />
-          <span>Linq <em>Field</em></span>
-        </div>
-        <nav className="tabs">
-          {nav.map((n) => (
-            <button key={n.page} className={page === n.page ? "on" : ""} onClick={() => setPage(n.page)}>
-              {n.label}
-              {!!n.badge && <span className="badge">{n.badge}</span>}
-            </button>
-          ))}
-        </nav>
-        <span className="grow" />
-        <button className="btn primary small log-btn" onClick={() => overlay({ kind: "interaction" })}>
-          <Plus size={15} /> Log visit
-        </button>
-        <label className="viewer" title="Switch who you're viewing as">
-          <span>Viewing as</span>
-          <select
-            value={viewer}
-            onChange={(e) => {
-              if (e.target.value === "master") setMode("master");
-              else {
-                setActingAgentId(e.target.value);
-                setMode("agent");
-              }
-            }}
-          >
-            <option value="master">Master (you)</option>
-            <optgroup label="Agents">
-              {data.agents.filter((a) => a.status === "active").map((a) => (
-                <option key={a.id} value={a.id}>{a.name}</option>
+    <>
+      <div className="announce">Demo with sample data — try anything. Changes only save in your browser.</div>
+      <div className="shell">
+        {menu && <div className="side-scrim" onClick={() => setMenu(false)} />}
+        <nav className={`side ${menu ? "open" : ""}`}>
+          <div className="brand">
+            <LinqMark size={28} />
+            <div>
+              Linq <em>Field</em>
+            </div>
+          </div>
+          <div className="mode" role="tablist">
+            <button className={mode === "master" ? "on" : ""} onClick={() => switchMode("master")}>Master</button>
+            <button className={mode === "agent" ? "on" : ""} onClick={() => switchMode("agent")}>Agent</button>
+          </div>
+          {groups.map((g) => (
+            <div className="nav-group" key={g.label}>
+              <div className="nav-label">{g.label}</div>
+              {g.items.map((it) => (
+                <button key={it.label} className={`nav-item ${page === it.page && !it.disabled ? "on" : ""}`} disabled={it.disabled} onClick={() => go(it.page)}>
+                  {it.icon}
+                  {it.label}
+                  {!!it.badge && <span className="badge">{it.badge}</span>}
+                </button>
               ))}
-            </optgroup>
-          </select>
-        </label>
-        <button className={`icon-btn ${page === "settings" ? "on" : ""}`} onClick={() => setPage("settings")} aria-label="Demo settings">
-          <SettingsIcon size={16} />
-        </button>
-      </header>
-
-      <div className="demo-strip">
-        <span>Demo · sample data · changes stay in your browser</span>
-        {mode === "agent" && me && <span>Agent view: {me.name} · code {me.code}</span>}
+            </div>
+          ))}
+          <div className="side-foot">
+            <div className="me">
+              <span className="avatar">{mode === "master" ? "MA" : initials(me?.name ?? "?")}</span>
+              {mode === "master" ? (
+                <div>
+                  <b>Master agent</b>
+                  <span>{data.agents.length} agents in your group</span>
+                </div>
+              ) : (
+                <label>
+                  <span>Signed in as</span>
+                  <select value={actingAgentId} onChange={(e) => setActingAgentId(e.target.value)}>
+                    {agents.map((a) => <option key={a.id} value={a.id}>{a.name}</option>)}
+                  </select>
+                </label>
+              )}
+            </div>
+            <button className={`nav-item ${page === "settings" ? "on" : ""}`} onClick={() => go("settings")}>
+              <SettingsIcon size={17} /> Settings
+            </button>
+          </div>
+        </nav>
+        <main className="main">
+          <header className="top">
+            <button className="icon-btn menu-btn" onClick={() => setMenu(true)} aria-label="Menu">
+              <Menu size={17} />
+            </button>
+            <h1>{title}</h1>
+            <span className="spacer" />
+            {mode === "agent" && me && <span className="code only-wide-inline">{me.code}</span>}
+            <span className="pill plain white">{mode === "master" ? "Master" : "Agent"}</span>
+          </header>
+          <div className="content">
+            {page === "overview" && <Overview go={go} />}
+            {page === "agents" && <Agents />}
+            {page === "merchants" && <Merchants />}
+            {page === "verification" && <Verification />}
+            {page === "funnel" && <Funnel />}
+            {page === "followups" && <FollowUps />}
+            {page === "intel" && <FieldIntel />}
+            {page === "territory" && <Territory />}
+            {page === "settings" && <Settings />}
+            {page === "workspace" && <Workspace go={go} />}
+            {page === "history" && <MyHistory />}
+          </div>
+        </main>
       </div>
-
-      <main className="page">
-        <h1 className="page-title">{TITLE[page]}</h1>
-        {page === "pipeline" && <Pipeline />}
-        {page === "today" && <Today />}
-        {page === "team" && <Team />}
-        {page === "notes" && <Notes />}
-        {page === "checks" && <Checks />}
-        {page === "insights" && <Insights />}
-        {page === "settings" && <Settings />}
-      </main>
-
-      <button className="fab" onClick={() => overlay({ kind: "interaction" })} aria-label="Log a visit">
-        <Plus size={24} />
-      </button>
-      <nav className="tabbar">
-        {nav.map((n) => (
-          <button key={n.page} className={page === n.page ? "on" : ""} onClick={() => setPage(n.page)}>
-            <span className="tb-ic">
-              {n.icon}
-              {!!n.badge && <span className="dot" />}
-            </span>
-            {n.label}
-          </button>
-        ))}
-      </nav>
       {toastMsg && <div className="toast">{toastMsg}</div>}
-    </div>
+    </>
   );
 }
 

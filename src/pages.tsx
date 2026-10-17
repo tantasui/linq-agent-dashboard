@@ -791,6 +791,7 @@ export function Settings() {
       <Card title="Demo data">
         <p className="hint" style={{ marginBottom: 14 }}>Everything here is sample data saved in this browser only. Nobody else sees your changes.</p>
         <button className="btn" onClick={() => { if (confirm("Reset all demo data?")) { dispatch({ type: "reset" }); toast("Demo data reset"); } }}>Reset demo data</button>
+        <p className="tiny" style={{ marginTop: 16 }}>Build {new Date(__BUILD_TIME__).toLocaleString("en-GB", { dateStyle: "medium", timeStyle: "short" })}</p>
       </Card>
       <Card title="Not in the demo yet">
         <ul className="hint" style={{ margin: 0, paddingLeft: 18, lineHeight: 1.7 }}>

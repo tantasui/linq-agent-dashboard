@@ -41,8 +41,10 @@ business ("No bank yet", "KYB review", "Quiet 14d+"), follow-ups grouped into
 overdue/today/coming up with a call button, a stage bar per agent, the tiered
 KYB explainer, and a "biggest drop" sentence on the funnel.
 
-Styling follows the Front-style DESIGN.md: aubergine canvas, lilac hairlines
-instead of shadows, lilac-mist number cards, lime only on the primary action.
+Styling follows the Attio-style DESIGN.md: white canvas, near-black ink,
+hairline borders with faint blue-tinted shadows, cobalt as the one accent, and
+a serif reserved for merchants' own words in field notes. Amber and red appear
+only to flag problems.
 
 Demo-only controls (live, these come from Linq B2B automatically):
 stage buttons on a business, "Simulate a payment", and the simulated Smile ID

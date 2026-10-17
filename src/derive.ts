@@ -124,14 +124,14 @@ export const initials = (name: string) =>
 
 export type ColumnKey = "talked" | "signed" | "verified" | "link" | "paid" | "regular";
 
-/** Board columns. Colour lightens from deep plum to pale lilac as a business gets closer to paying. */
+/** Board columns. Colour runs from grey to deep cobalt as a business gets closer to paying. */
 export const COLUMNS: { key: ColumnKey; label: string; hint: string; color: string }[] = [
-  { key: "talked", label: "Talked", hint: "Visited, not signed up", color: "#6e2a8c" },
-  { key: "signed", label: "Signed up", hint: "Account made, setting up", color: "#8034bf" },
-  { key: "verified", label: "Verified", hint: "KYB passed, no pay link", color: "#9a55dc" },
-  { key: "link", label: "Pay link", hint: "Ready, waiting for a payment", color: "#b375f4" },
-  { key: "paid", label: "First payment", hint: "1–2 payments so far", color: "#cdb3f8" },
-  { key: "regular", label: "Regular", hint: "3+ payments", color: "#e2dcf6" },
+  { key: "talked", label: "Talked", hint: "Visited, not signed up", color: "#c4cad3" },
+  { key: "signed", label: "Signed up", hint: "Account made, setting up", color: "#9aa3b0" },
+  { key: "verified", label: "Verified", hint: "KYB passed, no pay link", color: "#8fb3f6" },
+  { key: "link", label: "Pay link", hint: "Ready, waiting for a payment", color: "#6b9cf5" },
+  { key: "paid", label: "First payment", hint: "1–2 payments so far", color: "#407ff2" },
+  { key: "regular", label: "Regular", hint: "3+ payments", color: "#1b4fb3" },
 ];
 
 export const REGULAR_AT = 3;

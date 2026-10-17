@@ -42,8 +42,8 @@ overdue/today/coming up with a call button, a stage bar per agent, the tiered
 KYB explainer, and a "biggest drop" sentence on the funnel.
 
 Styling follows the Attio-style DESIGN.md: white canvas, near-black ink,
-hairline borders with faint blue-tinted shadows, cobalt as the one accent, and
-a serif reserved for merchants' own words in field notes. Amber and red appear
+hairline borders with faint blue-tinted shadows, cobalt as the one accent, set in
+Barlow, with merchants' own words in field notes in italic. Amber and red appear
 only to flag problems.
 
 Demo-only controls (live, these come from Linq B2B automatically):

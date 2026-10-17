@@ -1,6 +1,6 @@
-/* Attio-style tokens: white canvas, near-black ink, hairline borders, faint
-   blue-tinted shadows, and cobalt as the one accent. Serif is kept for the
-   merchants' own words in field notes. */
+/* Attio-style tokens set in Barlow: white canvas, near-black ink, hairline
+   borders, faint blue-tinted shadows, cobalt as the one accent. Merchants'
+   own words in field notes are set in italic. */
 :root {
   --canvas: #ffffff;
   --paper: #f4f5f6;
@@ -40,17 +40,17 @@
   --r-card: 12px;
   --r-btn: 10px;
   --r-badge: 7px;
-  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
-  --font-display: "Inter Tight", "Inter", ui-sans-serif, system-ui, sans-serif;
-  --font-serif: "Source Serif 4", Georgia, serif;
+  --font: "Barlow", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Barlow", ui-sans-serif, system-ui, sans-serif;
+  --font-quote: "Barlow", ui-sans-serif, system-ui, sans-serif;
   color-scheme: light;
 }
 
 * { box-sizing: border-box; }
 html, body, #root { min-height: 100%; }
 body {
-  margin: 0; background: var(--bg); color: var(--text); font: 500 14px/1.45 var(--font);
-  letter-spacing: -0.01em; font-feature-settings: "ss03" on; -webkit-font-smoothing: antialiased;
+  margin: 0; background: var(--bg); color: var(--text); font: 500 15px/1.45 var(--font);
+  letter-spacing: 0; -webkit-font-smoothing: antialiased;
 }
 button, input, select, textarea { font: inherit; color: inherit; letter-spacing: inherit; }
 button { cursor: pointer; }
@@ -65,7 +65,7 @@ a { color: inherit; }
   position: sticky; top: 0; height: 100vh; overflow-y: auto; background: var(--paper);
   padding: 18px 12px 14px; display: flex; flex-direction: column; gap: 18px;
 }
-.brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; font: 600 17px/1 var(--font-display); letter-spacing: -0.02em; color: var(--ink); }
+.brand { display: flex; align-items: center; gap: 10px; padding: 0 8px; font: 600 17px/1 var(--font-display); letter-spacing: -0.01em; color: var(--ink); }
 .brand em { font-style: normal; color: var(--slate-600); font-weight: 500; }
 .mode { display: grid; grid-template-columns: 1fr 1fr; padding: 3px; border-radius: var(--r-btn); background: var(--haze); }
 .mode button { border: 0; background: transparent; padding: 7px 0; border-radius: 8px; color: var(--muted); font-size: 13px; }
@@ -95,7 +95,7 @@ a { color: inherit; }
   position: sticky; top: 0; z-index: 5; display: flex; align-items: center; gap: 12px; padding: 18px 32px 14px;
   background: rgba(255, 255, 255, 0.88); backdrop-filter: blur(12px);
 }
-.top h1 { font: 600 32px/1.19 var(--font-display); letter-spacing: -0.02em; margin: 0; }
+.top h1 { font: 600 32px/1.19 var(--font-display); letter-spacing: -0.01em; margin: 0; }
 .top .spacer { flex: 1; }
 .content { padding: 6px 32px 72px; display: flex; flex-direction: column; gap: 18px; max-width: 1360px; width: 100%; }
 
@@ -121,7 +121,7 @@ a { color: inherit; }
 .stat { display: flex; flex-direction: column; gap: 6px; }
 .stat .k { font-size: 13px; color: var(--muted); display: flex; align-items: center; gap: 7px; }
 .stat .k svg { color: var(--cobalt); }
-.stat .v { font: 600 34px/1.1 var(--font-display); letter-spacing: -0.025em; color: var(--ink); }
+.stat .v { font: 600 34px/1.1 var(--font-display); letter-spacing: -0.01em; color: var(--ink); }
 .stat .s { font-size: 12px; color: var(--subtle); }
 
 .btn {
@@ -212,12 +212,12 @@ button.pill:hover { background: var(--paper); }
 .callout b { color: var(--ink); font-weight: 600; }
 
 /* ---------- agent home ---------- */
-.hello { margin: 2px 0 0; font: 600 32px/1.15 var(--font-display); letter-spacing: -0.02em; }
+.hello { margin: 2px 0 0; font: 600 32px/1.15 var(--font-display); letter-spacing: -0.01em; }
 .hero {
   display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; width: 100%; text-align: left;
   border: 1px solid var(--periwinkle); border-radius: var(--r-card); padding: 22px 24px; background: var(--ice); color: var(--ink);
 }
-.hero b { display: block; font: 600 22px/1.25 var(--font-display); letter-spacing: -0.02em; }
+.hero b { display: block; font: 600 22px/1.25 var(--font-display); letter-spacing: -0.01em; }
 .hero span { color: var(--carbon); font-size: 14px; }
 .hero .hero-cta { background: var(--graphite); color: #fff; border-radius: var(--r-btn); padding: 10px 18px; font-size: 15px; display: inline-flex; align-items: center; gap: 7px; }
 .hero:hover .hero-cta { background: #000; }
@@ -258,7 +258,7 @@ button.pill:hover { background: var(--paper); }
 
 .note { display: flex; flex-direction: column; gap: 10px; }
 .note .cat { font-size: 11px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--cobalt); font-weight: 600; }
-.note blockquote { margin: 0; font: 400 22px/1.23 var(--font-serif); letter-spacing: -0.015em; display: flex; gap: 8px; color: var(--ink); }
+.note blockquote { margin: 0; font: italic 500 22px/1.25 var(--font-quote); letter-spacing: -0.005em; display: flex; gap: 8px; color: var(--ink); }
 .note blockquote svg { flex-shrink: 0; margin-top: 4px; color: var(--periwinkle); }
 .note p { margin: 0; font-size: 14px; color: var(--carbon); }
 .note .hyp { font-size: 13px; color: var(--carbon); background: var(--paper); border-radius: var(--r-btn); padding: 9px 11px; border: 1px solid var(--line); }
@@ -271,7 +271,7 @@ button.pill:hover { background: var(--paper); }
 .tier p { margin: 0; font-size: 13px; color: var(--muted); }
 .mini { display: flex; flex-direction: column; }
 .mini span { font-size: 12px; color: var(--subtle); }
-.mini b { font: 600 22px/1.2 var(--font-display); letter-spacing: -0.02em; }
+.mini b { font: 600 22px/1.2 var(--font-display); letter-spacing: -0.01em; }
 
 /* ---------- board view ---------- */
 .find { display: flex; align-items: center; gap: 8px; border: 1px solid var(--line); border-radius: var(--r-btn); padding: 0 12px; color: var(--fog); flex: 1 1 240px; background: var(--canvas); }
@@ -323,7 +323,7 @@ button.pill:hover { background: var(--paper); }
 /* ---------- overlays ---------- */
 .scrim { position: fixed; inset: 0; background: rgba(16, 17, 19, 0.35); z-index: 20; display: flex; justify-content: center; align-items: flex-start; padding: 6vh 16px; overflow-y: auto; }
 .modal { width: 100%; max-width: 580px; background: var(--canvas); border-radius: 14px; padding: 24px; display: flex; flex-direction: column; gap: 16px; box-shadow: var(--shadow-float); border: 1px solid var(--line); }
-.modal h3 { margin: 0; font: 600 24px/1.2 var(--font-display); letter-spacing: -0.02em; }
+.modal h3 { margin: 0; font: 600 24px/1.2 var(--font-display); letter-spacing: -0.01em; }
 .modal-head { display: flex; align-items: flex-start; gap: 10px; }
 .modal-head .spacer { flex: 1; }
 .drawer-scrim { position: fixed; inset: 0; background: rgba(16, 17, 19, 0.25); z-index: 15; }

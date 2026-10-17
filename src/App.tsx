@@ -13,12 +13,13 @@ import {
   Users,
   Wallet,
 } from "lucide-react";
-import { useEffect, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 import { initials, startOfDay } from "./derive";
 import { OverlayProvider, useOverlay } from "./overlays";
 import { Agents, FieldIntel, FollowUps, Funnel, Merchants, MyHistory, Overview, Settings, Territory, Verification, Workspace, type Page } from "./pages";
 import { DAY } from "./seed";
 import { StoreProvider, useScope, useStore, type Mode } from "./store";
+import type { Agent } from "./types";
 import { LinqMark } from "./ui";
 
 type NavItem = { page: Page; label: string; icon: ReactNode; badge?: number; disabled?: boolean };
@@ -40,45 +41,86 @@ const TITLES: Record<Page, string> = {
 const HOME: Record<Mode, Page> = { master: "overview", agent: "workspace" };
 const AGENT_PAGES: Page[] = ["workspace", "merchants", "followups", "intel", "funnel", "history", "settings"];
 
-function readHash(): { mode: Mode; page: Page } | null {
-  const [mode, page] = location.hash.replace(/^#\/?/, "").split("/");
-  if ((mode === "master" || mode === "agent") && page && page in TITLES) return { mode, page: page as Page };
+type Route = { mode: Mode; page: Page; agentId?: string };
+
+const slug = (code: string) => code.toLowerCase();
+
+/**
+ * Paths: /master/<page> and /agent/<referral code>/<page>, e.g.
+ * /agent/lq-tolu/workspace. Old #/master/... links are still understood.
+ */
+function parseRoute(agents: Agent[]): Route | null {
+  const raw = location.hash.startsWith("#/") ? location.hash.slice(1) : location.pathname;
+  const [mode, a, b] = raw.split("/").filter(Boolean);
+  if (mode === "master") return a && a in TITLES ? { mode, page: a as Page } : { mode, page: HOME.master };
+  if (mode === "agent") {
+    const agent = agents.find((x) => slug(x.code) === a);
+    if (!agent) {
+      // Old links had no agent in them (#/agent/workspace): open the first active one.
+      const first = agents.find((x) => x.status === "active");
+      return first && AGENT_PAGES.includes(a as Page) ? { mode, agentId: first.id, page: a as Page } : null;
+    }
+    return { mode, agentId: agent.id, page: AGENT_PAGES.includes(b as Page) ? (b as Page) : HOME.agent };
+  }
   return null;
+}
+
+function routePath(r: Route, agents: Agent[]): string {
+  if (r.mode === "master") return `/master/${r.page}`;
+  const agent = agents.find((x) => x.id === r.agentId) ?? agents.find((x) => x.status === "active");
+  return agent ? `/agent/${slug(agent.code)}/${r.page}` : `/master/${HOME.master}`;
 }
 
 function Shell() {
   const { data, mode, setMode, actingAgentId, setActingAgentId, toastMsg } = useStore();
   const scope = useScope();
   const overlay = useOverlay();
-  const [page, setPage] = useState<Page>(() => readHash()?.page ?? "overview");
+  const [page, setPage] = useState<Page>(() => parseRoute(data.agents)?.page ?? HOME.master);
   const [menu, setMenu] = useState(false);
 
-  // Hash routing, so a refresh or a shared link lands on the same page.
-  useEffect(() => {
-    const h = readHash();
-    if (h) setMode(h.mode);
-    const onHash = () => {
-      const x = readHash();
-      if (x) {
-        setMode(x.mode);
-        setPage(x.page);
-      }
-    };
-    window.addEventListener("hashchange", onHash);
-    return () => window.removeEventListener("hashchange", onHash);
-  }, [setMode]);
+  // URL ⇄ state. A navigation pushes a history entry so Back/Forward work;
+  // landing on a stale or unknown URL rewrites it in place.
+  const [ready, setReady] = useState(false);
+  const fromHistory = useRef(false);
 
   useEffect(() => {
+    const apply = (r: Route) => {
+      setMode(r.mode);
+      if (r.agentId) setActingAgentId(r.agentId);
+      setPage(r.page);
+    };
+    const r = parseRoute(data.agents);
+    if (r) apply(r);
+    history.replaceState(null, "", routePath(r ?? { mode: "master", page: HOME.master }, data.agents));
+    setReady(true);
+    const onPop = () => {
+      const x = parseRoute(data.agents);
+      if (!x) return;
+      fromHistory.current = true;
+      apply(x);
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
+    if (!ready) return;
     if (mode === "agent" && !AGENT_PAGES.includes(page)) {
-      setPage("workspace");
+      setPage(HOME.agent);
       return;
     }
-    const next = `#/${mode}/${page}`;
-    if (location.hash !== next) history.replaceState(null, "", next);
+    const next = routePath({ mode, page, agentId: actingAgentId }, data.agents);
+    if (location.pathname !== next || location.hash) {
+      if (fromHistory.current) history.replaceState(null, "", next);
+      else history.pushState(null, "", next);
+    }
+    fromHistory.current = false;
+    document.title = `${mode === "agent" && page === "merchants" ? "My businesses" : TITLES[page]} · Linq Field`;
     window.scrollTo(0, 0);
     overlay(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, page]);
+  }, [ready, mode, page, actingAgentId]);
 
   const go = (p: Page) => {
     setPage(p);

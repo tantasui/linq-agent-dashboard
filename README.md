@@ -15,14 +15,16 @@ npm run build    # static site in dist/
 
 ## Host
 
-It's a static site with hash routing (`#/master/overview`), so any static host
-works with no rewrites:
+It's a static site (one self-contained `index.html`) with path routing, so the
+host must serve `index.html` for every path (Brimble, Vercel and Netlify SPA
+defaults do):
 
 - **Vercel:** `vercel --prod` from this folder (framework: Vite, output: `dist`)
 - **Netlify:** build `npm run build`, publish `dist`
 - Or drag the `dist/` folder into Netlify Drop
 
-Links can point straight at a page, e.g. `/#/agent/workspace`.
+URLs: `/master/<page>` and `/agent/<referral code>/<page>`, e.g.
+`/agent/lq-tolu/workspace`. Back/Forward work, and old `#/...` links redirect.
 
 ## What's in it
 
